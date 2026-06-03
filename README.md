@@ -24,11 +24,11 @@ A collection of 7 AI-powered project ideas spanning financial industry work and 
 - This agent automatically reads those reports and delivers a concise 1-page brief with key numbers, risks, and any notable shifts in how management is talking about the business
 - Think of it as a smart reading assistant that watches every company report so you don't have to
 
-**Project 4 — Gmail Ad & Promo Tracker** *(Personal)*
-- Most people receive hundreds of promotional emails per week — the vast majority are noise, but occasionally there's a meaningful deal buried inside
-- Manually checking the Promotions tab is tedious; ignoring it means missing things like flight sales or expiring discounts
-- This agent reads every promo email daily, extracts the relevant details (discount, expiry, brand), and sends one clean weekly digest with only the deals worth your attention
-- Think of it as a personal deal scout that reads your inbox so you don't have to
+**Project 4 — Gmail Ad & Promo Tracker + Subscription Controller** *(Personal)*
+- Reads every promo email daily and sends a clean weekly digest of deals worth your attention — flight sales, expiring discounts, renewal offers
+- Also detects all your active subscriptions and cross-checks them against your actual app usage on your phone
+- Flags any subscription used less than once per month (configurable threshold) and recommends cancellation with estimated savings
+- Think of it as a deal scout and a subscription auditor in one — it finds savings on both ends
 
 **Project 5 — Stock & Portfolio Tracker with AI Commentary** *(Personal)*
 - When you own stocks, prices move up and down every day — but knowing *why* requires reading financial news for each company, which takes a lot of time
@@ -165,29 +165,34 @@ After Microsoft posts its quarterly earnings, the agent fetches the transcript a
 
 ---
 
-## Project 4: Gmail Ad & Promo Tracker
+## Project 4: Gmail Ad & Promo Tracker + Subscription Controller
 
 **Category:** Personal / Interest  
-**Model:** Claude Haiku 4.5 (high-volume classification) + Claude Sonnet 4.6 (digest drafting)
+**Model:** Claude Haiku 4.5 (high-volume classification) + Claude Sonnet 4.6 (digest drafting + recommendations)
 
 **Description:**  
-Connects to Gmail, classifies promotional emails, extracts offers and deals, surfaces expiring discounts, and delivers a weekly digest of the best opportunities — so you never miss a meaningful deal buried in inbox noise.
+Connects to Gmail, classifies promotional emails, extracts offers and deals, surfaces expiring discounts, and delivers a weekly digest of the best opportunities. Also includes a Subscription Controller feature that cross-references your active subscriptions against actual app usage on your phone — so you're never paying for something you've forgotten about or stopped using.
 
 **What this solves:**  
 The average person receives hundreds of promotional emails per week. Most are noise, but occasionally there's a meaningful deal — a flight sale, a subscription renewal discount, a limited-time offer on something you actually want. Checking the Promotions tab manually is tedious; ignoring it means missing things. This agent reads everything and distills it into one weekly summary you can scan in 2 minutes.
 
-**Two-model approach:**  
-Haiku handles the high-volume classification pass (cheap and fast — processing 200 emails costs fractions of a cent), while Sonnet handles the more nuanced task of ranking deals and writing the digest narrative. This keeps costs low while maintaining quality on the output you actually read.
+On top of that, the average person pays for 4–8 subscriptions they rarely use. Gym apps, streaming services, productivity tools — they auto-renew quietly, and most people only notice when reviewing their bank statement months later. The Subscription Controller catches these before they renew.
 
-**Concrete example:**  
+**Two-model approach:**  
+Haiku handles the high-volume classification pass (cheap and fast — processing 200 emails costs fractions of a cent), while Sonnet handles the more nuanced task of ranking deals, evaluating usage patterns, and writing the digest and cancellation recommendations.
+
+**Concrete example — Promo Digest:**  
 On Sunday evening you receive: *"This week's top deals: (1) United Airlines — 40% off flights to Asia, expires Tuesday. (2) Apple — trade-in promotion for iPhone, ends June 15. (3) Costco — membership renewal at $20 off, expires this month. Skipped: 143 routine promotional emails."*
+
+**Concrete example — Subscription Controller:**  
+The agent cross-checks your subscriptions against your phone's app usage data and reports: *"You are paying for 6 subscriptions. Flagged for review: (1) Headspace ($12.99/mo) — last opened 47 days ago, below your 30-day threshold. (2) Duolingo Plus ($6.99/mo) — 0 sessions in the past 30 days. (3) Adobe Creative Cloud ($54.99/mo) — used 2 times in 30 days, consider whether the free tier covers your needs. Estimated monthly savings if cancelled: $74.97."*
 
 **Who uses this:**
 - Anyone with a cluttered Gmail inbox who shops online or holds subscriptions
 - People who travel frequently and want to catch flight/hotel sales without monitoring constantly
-- Bargain hunters who don't want to manually scan deal sites
+- Anyone who has accumulated app subscriptions over time and wants to audit what they're actually using
 
-**Workflow:**
+**Feature 1 — Promo Tracker Workflow:**
 1. Scheduled agent runs daily using Gmail API with OAuth authentication
 2. Fetch all emails from Promotions tab since last run
 3. Claude Haiku classifies each email: promo type, brand, discount amount, expiry date
@@ -196,6 +201,16 @@ On Sunday evening you receive: *"This week's top deals: (1) United Airlines — 
 6. Claude Sonnet ranks remaining deals by value and relevance, drafts a weekly digest
 7. Send digest to user via email every Sunday evening
 8. Optionally flag high-value deals in real time (e.g., >50% off preferred brands)
+
+**Feature 2 — Subscription Controller Workflow:**
+1. Detect active subscriptions by scanning Gmail for recurring billing confirmation emails and bank statements
+2. Pull app usage data from phone (iOS Screen Time API or Android Digital Wellbeing API)
+3. Match each subscription to its corresponding app and retrieve last-opened date and monthly session count
+4. Apply configurable usage threshold (default: flag if used less than once per month)
+5. Claude evaluates each flagged subscription: cost, usage frequency, availability of a free tier alternative
+6. Generate a ranked cancellation recommendation list with estimated monthly savings
+7. Include direct cancellation links where available (App Store, Google Play, or the service's account page)
+8. Send monthly subscription audit report alongside the weekly promo digest
 
 ---
 
