@@ -156,9 +156,40 @@ Created 6 high-level issues to track the Portfolio Intelligence Agent build:
   - Stale review dismissal enabled
   - Conversation resolution required before merge
 
+### buffett-skills Research & Integration
+
+- Reviewed `github.com/agi-now/buffett-skills` — a Claude Code skill collection implementing Warren Buffett's full investment framework
+- Repo structure: one core skill (`buffett`) + 8 reference documents covering thinking frameworks, investment philosophy, moats, management, financial metrics, valuation, risk/behavior, and industry playbooks
+- Skill auto-triggers on any investment-related conversation via 3 dispatch paths: quick screen (8-question filter), deep analysis (reads reference docs), or topic-specific lookup
+- Evaluation results from repo: 100% pass rate with skill vs. 66.7% without (33% improvement across 3 test cases)
+
+**Integration decisions:**
+
+| Component | Used in | How |
+|-----------|---------|-----|
+| SKILL.md 8-question filter | Portfolio Intelligence Agent | Monthly holding health check |
+| `05-financial-metrics.md` | Earnings summarizer | Inject ROIC/ROE/cash conversion thresholds into Claude Opus 4.8 prompt |
+| `07-risk-behavior.md` | Weekly digest | 4 sell criteria as automated sell-signal detection per holding |
+| `08-industry-playbooks.md` | Earnings summarizer | Sector-aware context injection (banking, insurance, tech, etc.) |
+| Full SKILL.md output structure | Investment Research Assistant (#7) | Adopted as standard brief template |
+| `buffett` skill (install) | Investment Research Assistant (#7) | Plug-and-play via Claude Code — replaces building brief logic from scratch |
+
+**GitHub issues created:**
+
+| # | Title |
+|---|-------|
+| [#23](https://github.com/binglunzhao/FIN20260430/issues/23) | Integrate buffett-skills into Portfolio Intelligence Agent and Investment Research Assistant *(parent)* |
+| [#24](https://github.com/binglunzhao/FIN20260430/issues/24) | Install buffett skill into Claude Code for Project 7 |
+| [#25](https://github.com/binglunzhao/FIN20260430/issues/25) | Inject doc 05 financial metrics thresholds into earnings summarizer prompt |
+| [#26](https://github.com/binglunzhao/FIN20260430/issues/26) | Integrate 4 sell criteria from doc 07 into weekly digest |
+| [#27](https://github.com/binglunzhao/FIN20260430/issues/27) | Build sector-aware context injection from doc 08 industry playbooks |
+| [#28](https://github.com/binglunzhao/FIN20260430/issues/28) | Monthly holding health check using 8-question quick filter |
+| [#29](https://github.com/binglunzhao/FIN20260430/issues/29) | Adopt buffett-skills output structure as Project 7 brief template |
+
 ### Next Steps
 
 - [ ] Start on P1 issues: test Finnhub and FMP transcript endpoints (#7, #8)
 - [ ] Test yfinance + FinNLP news fetch (#14, #15)
 - [ ] Design project architecture (#3)
 - [ ] Update README to reflect merged Portfolio Intelligence Agent project
+- [ ] Install buffett skill locally and test against a sample ticker (#24)
