@@ -186,10 +186,47 @@ Created 6 high-level issues to track the Portfolio Intelligence Agent build:
 | [#28](https://github.com/binglunzhao/FIN20260430/issues/28) | Monthly holding health check using 8-question quick filter |
 | [#29](https://github.com/binglunzhao/FIN20260430/issues/29) | Adopt buffett-skills output structure as Project 7 brief template |
 
-### Next Steps
+### Next Steps (carried into Session 4)
 
 - [ ] Start on P1 issues: test Finnhub and FMP transcript endpoints (#7, #8)
 - [ ] Test yfinance + FinNLP news fetch (#14, #15)
 - [ ] Design project architecture (#3)
 - [ ] Update README to reflect merged Portfolio Intelligence Agent project
-- [ ] Install buffett skill locally and test against a sample ticker (#24)
+
+---
+
+## Session 4 — June 12, 2026
+
+---
+
+### buffett Skill Installation (Issue #24 ✅ Closed)
+
+- Decided to start with Issue #24 as the quickest win — no API keys, no build work, immediate value for Project 7
+- Installed the `buffett` skill **globally** at `~/.claude/skills/buffett/` so it is available across all Claude Code sessions, not just this project
+- Downloaded `SKILL.md` + all 8 reference documents directly from `github.com/agi-now/buffett-skills`
+
+**Installed file structure:**
+```
+~/.claude/skills/buffett/
+├── SKILL.md
+└── references/
+    ├── 01-thinking-frameworks.md
+    ├── 02-investment-philosophy.md
+    ├── 03-business-moat.md
+    ├── 04-management-governance.md
+    ├── 05-financial-metrics.md
+    ├── 06-valuation-capital.md
+    ├── 07-risk-behavior.md
+    └── 08-industry-playbooks.md
+```
+
+- Skill auto-triggers on any stock/investment topic without explicit invocation
+- Issue #24 closed with completion notes on GitHub
+
+### Next Steps
+
+- [ ] Test buffett skill in a new Claude Code session against a sample ticker
+- [ ] Test Finnhub transcript endpoint for AAPL, MSFT, NVDA (#7)
+- [ ] Test FMP free tier as cheaper alternative (#8)
+- [ ] Test yfinance weekly OHLCV for 5+ tickers (#14)
+- [ ] Test FinNLP Finnhub_Date_Range news fetch (#15)
