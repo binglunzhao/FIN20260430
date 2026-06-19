@@ -337,20 +337,58 @@ First run triggered a SQLite database lock in yfinance's local cache for one tic
 
 ---
 
+## Step 10 — FMP Transcript API Test
+**Date:** June 18, 2026
+**Issue:** #8 ✅ Closed
+
+### What happened
+Tested whether the Financial Modeling Prep (FMP) free tier could serve as the transcript data source for the Portfolio Intelligence Agent.
+
+### Test script
+`research/issue_8_fmp_transcripts.py` — 5 tests across AAPL, MSFT, NVDA
+
+### Results
+
+| Test | Endpoint | Result |
+|------|----------|--------|
+| List available quarters | `GET /v4/earning_call_transcript?symbol={ticker}` | HTTP 403 (all 3 tickers) |
+| Fetch latest transcript | `GET /v3/earning_call_transcript/{ticker}` | HTTP 403 (all 3 tickers) |
+| JSON structure inspection | — | Skipped (no data returned) |
+| Word count / completeness | — | Skipped (no data returned) |
+| Rate limit check | — | No throttling on 3 consecutive calls |
+
+### Finding
+**FMP free tier does NOT include earnings call transcripts.** HTTP 403 Forbidden on all transcript endpoints. Transcripts are a paid feature requiring FMP Starter plan (~$14/mo) or higher.
+
+### Options going forward
+
+| Option | Monthly Cost | Notes |
+|--------|-------------|-------|
+| FMP Starter | ~$14/mo | Unlocks transcripts; 250 calls/day → unlimited |
+| Finnhub Starter | ~$50/mo | Transcripts + news + earnings calendar under one key |
+| SEC EDGAR | Free | 10-Q/10-K filings as transcript substitute (issue #10) |
+
+### Project hygiene also added this step
+- `.gitignore` — protects `.env` and other sensitive files from being committed
+- `.env.example` — template for API keys (safe to commit, no real values)
+- `.env` — local only, gitignored, holds real API keys
+
+---
+
 ## Current Status
-**Date:** June 14, 2026
+**Date:** June 18, 2026
 
 ### Issues closed
 | # | Title | Closed |
 |---|-------|--------|
 | #14 | Confirm yfinance returns weekly OHLCV for 5+ tickers in one call | ✓ |
 | #24 | Install buffett skill into Claude Code for Project 7 | ✓ |
+| #8 | Test FMP free tier transcript endpoint for same 3 tickers | ✓ |
 
 ### Issues open (P1 — start next)
 | # | Title |
 |---|-------|
 | #7 | Test Finnhub /stock/transcripts endpoint for AAPL, MSFT, NVDA |
-| #8 | Test FMP free tier transcript endpoint for same 3 tickers |
 | #9 | Check transcript coverage for small/mid-cap stocks |
 | #10 | Confirm SEC EDGAR 10-Q/10-K fetch works as supplement |
 | #13 | Confirm transcript rate limits cover a 10-stock portfolio |
@@ -361,7 +399,7 @@ First run triggered a SQLite database lock in yfinance's local cache for one tic
 
 ### Dependency chain to first working build
 ```
-#7 + #8 → #11 (decide transcript source)
+#7 or #10 → #11 (decide transcript source)
 #15 + #16 → #19 (decide news source)
 #11 + #19 + #3 (architecture) → #4 (weekly digest) + #5 (earnings fetcher) → #6 (earnings summarizer)
 ```
