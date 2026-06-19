@@ -230,3 +230,78 @@ Created 6 high-level issues to track the Portfolio Intelligence Agent build:
 - [ ] Test FMP free tier as cheaper alternative (#8)
 - [ ] Test yfinance weekly OHLCV for 5+ tickers (#14)
 - [ ] Test FinNLP Finnhub_Date_Range news fetch (#15)
+
+---
+
+## Session 5 — June 14, 2026
+
+---
+
+### yfinance Price Data Validation (Issue #14 ✅ Closed)
+
+- Wrote `research/issue_14_yfinance_ohlcv.py` — a 5-test validation script against live market data
+- Confirmed yfinance is suitable as the weekly price data source:
+
+| Test | Result |
+|------|--------|
+| Batch download for 5 tickers (AAPL, MSFT, NVDA, TSLA, AMZN) | ✓ |
+| Weekly return calculation per ticker | ✓ |
+| Data completeness — no missing tickers, no unexpected NaN | ✓ |
+| Rate limits — 3 consecutive calls averaged 0.22s each | ✓ |
+| Single ticker API (`yf.Ticker`) | ✓ |
+
+**Edge case fixed:** First run triggered a SQLite database lock for MSFT, causing all-NaN close prices. Fixed with an automatic per-ticker retry fallback. Also fixed a `dropna()` call that was removing all rows — changed to `dropna(axis=1, how="all").dropna(how="all")`.
+
+**Decision:** yfinance confirmed as price data source. No API key, free, unlimited for personal use.
+
+### PROGRESS.md Created
+
+- Created `PROGRESS.md` — a full step-by-step development log (Steps 1–9) written for external readers
+- Covers: inception, ideation, agent design, GitHub board, FinGPT research, buffett-skills, branch protection, skill install, yfinance validation
+- Both files merged to `main` via PRs #32 and #33
+
+### Next Steps (carried into Session 6)
+
+- [ ] Test Finnhub transcript endpoint (#7)
+- [ ] Test FMP free tier transcript endpoint (#8)
+
+---
+
+## Session 6 — June 18, 2026
+
+---
+
+### FMP Transcript API Test (Issue #8 ✅ Closed)
+
+- Created feature branch `research/issue-8-fmp-transcripts`
+- Wrote `research/issue_8_fmp_transcripts.py` — 5-test script validating FMP's transcript endpoints for AAPL, MSFT, NVDA
+- Key finding: **FMP free tier returns HTTP 403 on all transcript endpoints** — transcripts are a paid feature
+
+| Endpoint | Result |
+|----------|--------|
+| `GET /v4/earning_call_transcript?symbol={ticker}` (list quarters) | HTTP 403 |
+| `GET /v3/earning_call_transcript/{ticker}` (fetch transcript) | HTTP 403 |
+
+- Issue #8 closed; PR #34 open for review
+
+### Project Hygiene Added
+
+- `.gitignore` — covers `.env`, `__pycache__`, `.DS_Store`, IDE files
+- `.env.example` — template for all API keys used across research scripts (safe to commit)
+- `.env` — local only (gitignored), holds real API keys loaded automatically by research scripts
+
+### Transcript Source Decision — Pending
+
+FMP free tier is ruled out. Options remaining:
+
+| Option | Cost | Notes |
+|--------|------|-------|
+| FMP Starter | ~$14/mo | Transcripts only |
+| Finnhub Starter | ~$50/mo | Transcripts + news + earnings calendar under one key |
+| SEC EDGAR | Free | 10-Q/10-K filings as transcript substitute |
+
+### Next Steps
+
+- [ ] Decide: test Finnhub Starter (#7) or SEC EDGAR (#10) first
+- [ ] Merge PR #34
+- [ ] Update session history and push to GitHub
