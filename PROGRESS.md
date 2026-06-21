@@ -375,8 +375,72 @@ Tested whether the Financial Modeling Prep (FMP) free tier could serve as the tr
 
 ---
 
+## Step 11 — SEC EDGAR 10-Q Validation
+**Date:** June 21, 2026
+**Issue:** #10 ✅ Closed
+
+### What happened
+Tested SEC EDGAR as a free alternative or supplement to paid transcript services.
+
+### Test script
+`research/issue_10_sec_edgar.py` — 5 tests: CIK lookup, 10-Q fetch, MD&A extraction, 8-K search, content quality
+
+### Results
+
+| Ticker | 10-Q Filed | MD&A Words | Assessment |
+|--------|-----------|------------|------------|
+| AAPL | 2026-05-01 | 3,497 | ✓ Substantial |
+| MSFT | 2026-04-29 | 180 | ⚠ Parsing truncated (regex edge case) |
+| NVDA | 2026-05-20 | 4,450 | ✓ Substantial |
+
+### Finding
+**EDGAR works as a free supplement but cannot replace earnings call transcripts.**
+
+| Capability | EDGAR 10-Q | Paid Transcript |
+|-----------|------------|----------------|
+| Actual earnings call text | ✗ | ✓ |
+| Analyst Q&A section | ✗ | ✓ |
+| Timeliness | 40–45 days after quarter end | Within hours of call |
+| Financial numbers & guidance language | ✓ | ✓ |
+| Cost | Free | $14–50/mo |
+
+**Decision:** EDGAR confirmed as secondary source only. Good for audited financial numbers and official written guidance — not suitable as primary transcript source.
+
+---
+
+## Step 12 — Finnhub Transcript API Test
+**Date:** June 21, 2026
+**Issue:** #7 ✅ Closed
+
+### What happened
+Tested Finnhub's `/stock/transcripts` endpoint — the leading candidate identified in Session 3 research.
+
+### Test script
+`research/issue_7_finnhub_transcripts.py` — 7 tests across AAPL, MSFT, NVDA
+
+### Results
+
+| Test | Result |
+|------|--------|
+| API key validation (`/quote`) | ✓ AAPL $298.05 confirmed live |
+| List transcripts (`/stock/transcripts/list`) | ✗ HTTP 403 — requires paid plan |
+| Fetch transcript (`/stock/transcripts`) | ✗ HTTP 403 — requires paid plan |
+
+### Finding
+**Finnhub transcript endpoints require Starter plan (~$50/mo).** Free tier blocked on all transcript endpoints.
+
+### Full transcript source picture (after #7 + #8 + #10)
+
+| Source | Free Tier | Paid Upgrade | Transcripts | News | Cost |
+|--------|-----------|-------------|-------------|------|------|
+| Finnhub | ✗ 403 | Starter | ✓ Speaker-segmented JSON | ✓ | ~$50/mo |
+| FMP | ✗ 403 | Starter | ✓ Flat string content | ✗ | ~$14/mo |
+| SEC EDGAR | N/A | Not needed | ✗ (10-Q only) | ✗ | Free |
+
+---
+
 ## Current Status
-**Date:** June 18, 2026
+**Date:** June 21, 2026
 
 ### Issues closed
 | # | Title | Closed |
@@ -384,22 +448,28 @@ Tested whether the Financial Modeling Prep (FMP) free tier could serve as the tr
 | #14 | Confirm yfinance returns weekly OHLCV for 5+ tickers in one call | ✓ |
 | #24 | Install buffett skill into Claude Code for Project 7 | ✓ |
 | #8 | Test FMP free tier transcript endpoint for same 3 tickers | ✓ |
+| #10 | Confirm SEC EDGAR 10-Q/10-K fetch works as supplement | ✓ |
+| #7 | Test Finnhub /stock/transcripts endpoint for AAPL, MSFT, NVDA | ✓ |
+
+### Decision pending — Issue #11
+Pick primary transcript source before architecture design (#3) can begin:
+- **FMP Starter (~$14/mo)** — transcripts only, cheapest path
+- **Finnhub Starter (~$50/mo)** — transcripts + news + earnings calendar under one key
 
 ### Issues open (P1 — start next)
 | # | Title |
 |---|-------|
-| #7 | Test Finnhub /stock/transcripts endpoint for AAPL, MSFT, NVDA |
+| #11 | Decide on primary transcript source |
 | #9 | Check transcript coverage for small/mid-cap stocks |
-| #10 | Confirm SEC EDGAR 10-Q/10-K fetch works as supplement |
 | #13 | Confirm transcript rate limits cover a 10-stock portfolio |
 | #15 | Install finnlp and test Finnhub_Date_Range for 7-day news fetch |
 | #16 | Compare FinNLP/Finnhub news quality vs NewsAPI free tier |
 | #18 | Pull few-shot sentiment examples from FinGPT dataset |
-| #3 | Design project architecture |
+| #3 | Design project architecture (blocked by #11) |
 
 ### Dependency chain to first working build
 ```
-#7 or #10 → #11 (decide transcript source)
-#15 + #16 → #19 (decide news source)
-#11 + #19 + #3 (architecture) → #4 (weekly digest) + #5 (earnings fetcher) → #6 (earnings summarizer)
+#11 (pick transcript source) → #9, #13 → #5 (earnings fetcher)
+#15 + #16 → #19 (decide news source) → #4 (weekly digest)
+#11 + #19 + #3 (architecture) → #4 + #5 → #6 (earnings summarizer)
 ```

@@ -305,3 +305,55 @@ FMP free tier is ruled out. Options remaining:
 - [ ] Decide: test Finnhub Starter (#7) or SEC EDGAR (#10) first
 - [ ] Merge PR #34
 - [ ] Update session history and push to GitHub
+
+---
+
+## Session 7 — June 21, 2026
+
+---
+
+### SEC EDGAR 10-Q Validation (Issue #10 ✅ Closed)
+
+- Created branch `research/issue-10-sec-edgar`
+- Wrote `research/issue_10_sec_edgar.py` — 5-test validation (CIK lookup, 10-Q fetch, MD&A extraction, 8-K search, content quality)
+- No API key required — EDGAR is fully public
+
+**Results:**
+
+| Ticker | 10-Q Filed | MD&A Words | Assessment |
+|--------|-----------|------------|------------|
+| AAPL | 2026-05-01 | 3,497 | ✓ Substantial |
+| MSFT | 2026-04-29 | 180 | ⚠ Parsing truncated (regex edge case) |
+| NVDA | 2026-05-20 | 4,450 | ✓ Substantial |
+
+**Finding:** EDGAR confirmed as a free secondary source — good for audited financial numbers and official written guidance language. Cannot replace actual call transcripts (no Q&A, no spoken tone, 40–45 day delay). Issue #10 closed, PR #35 open.
+
+### Finnhub Transcript API Test (Issue #7 ✅ Closed)
+
+- Created branch `research/issue-7-finnhub-transcripts`
+- Wrote `research/issue_7_finnhub_transcripts.py` — 7-test validation
+- Added `FINNHUB_API_KEY` to `.env` (free tier key obtained from finnhub.io)
+
+**Results:**
+
+| Test | Result |
+|------|--------|
+| API key validation (`/quote`) | ✓ AAPL $298.05 — key accepted |
+| Transcript listing (`/stock/transcripts/list`) | ✗ HTTP 403 — requires paid plan |
+| Transcript fetch (`/stock/transcripts`) | ✗ HTTP 403 — requires paid plan |
+
+**Finding:** Same result as FMP — free tier blocks all transcript endpoints. Starter plan (~$50/mo) required. Issue #7 closed, PR #36 open.
+
+### Full Transcript Source Picture
+
+| Source | Free Tier | Transcripts | Also Covers | Cost |
+|--------|-----------|-------------|-------------|------|
+| Finnhub | ✗ 403 | ✓ (paid) Speaker-segmented JSON | News + earnings calendar | ~$50/mo |
+| FMP | ✗ 403 | ✓ (paid) Flat string | Earnings calendar | ~$14/mo |
+| SEC EDGAR | N/A | ✗ (10-Q only) | Financial numbers | Free |
+
+### Next Steps
+
+- [ ] Decide on primary transcript source — FMP Starter ($14/mo) vs Finnhub Starter ($50/mo) → closes #11
+- [ ] Merge open PRs #34, #35, #36
+- [ ] Test FinNLP news fetch (#15) after transcript source confirmed
