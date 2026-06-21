@@ -1,6 +1,9 @@
 # Environment variables — never commit API keys
 .env
 
+# Local reference documents
+*.pdf
+
 # Python
 __pycache__/
 *.pyc
