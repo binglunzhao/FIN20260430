@@ -1,0 +1,16 @@
+{
+  "portfolio": [
+    { "ticker": "AAPL",  "shares": 10, "sector": "technology" },
+    { "ticker": "MSFT",  "shares": 8,  "sector": "technology" },
+    { "ticker": "NVDA",  "shares": 5,  "sector": "semiconductors" },
+    { "ticker": "AMZN",  "shares": 6,  "sector": "consumer/cloud" },
+    { "ticker": "TSLA",  "shares": 4,  "sector": "automotive/energy" }
+  ],
+  "settings": {
+    "digest_day": "friday",
+    "digest_time": "17:30",
+    "timezone": "America/New_York",
+    "price_move_threshold_pct": 3.0,
+    "earnings_lookback_days": 3
+  }
+}

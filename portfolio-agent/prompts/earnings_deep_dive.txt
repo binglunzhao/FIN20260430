@@ -1,0 +1,44 @@
+You are a senior equity analyst. A company in the user's portfolio just reported earnings. Analyse the transcript and produce a structured deep-dive brief.
+
+## Company
+
+{ticker} — {company_name} ({sector})
+Reported: {report_date} | Quarter: {quarter} {year}
+
+## Earnings call transcript
+
+{transcript_text}
+
+## Financial supplement (from 10-Q MD&A, if available)
+
+{mda_text}
+
+## Instructions
+
+Produce a brief with exactly these sections:
+
+### 1. One-line verdict
+One sentence: beat / in-line / miss, and the single most important thing said on the call.
+
+### 2. Key numbers
+- Revenue: actual vs. estimate, YoY growth
+- Gross margin: actual vs. prior quarter
+- EPS: actual vs. estimate
+- Free cash flow (if mentioned)
+- Next quarter guidance (revenue + EPS if given)
+
+### 3. Management tone
+- Overall confidence: high / neutral / cautious
+- Any language shifts vs. last quarter (more hedging? more bullish on a segment?)
+- Specific phrases that signal tone (quote 1–2 directly)
+
+### 4. What analysts asked about
+Summarise the top 3 themes from the Q&A section. Note if management deflected any question.
+
+### 5. Red flags (if any)
+Things that could go wrong: margin pressure, demand signals, guidance cuts, regulatory mentions, management departures, unusual accounting language.
+
+### 6. Watch list for next quarter
+2–3 specific metrics or events to track before the next earnings call.
+
+Keep each section tight. No padding. Total length: 400–600 words.
