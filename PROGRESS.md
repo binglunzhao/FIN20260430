@@ -439,6 +439,67 @@ Tested Finnhub's `/stock/transcripts` endpoint — the leading candidate identif
 
 ---
 
+## Step 13 — Motley Fool Free Transcript Scraping
+**Date:** June 21, 2026
+**Issue:** #37 ✅ Closed
+
+### What happened
+Tested whether earnings call transcripts could be scraped for free from Motley Fool (`fool.com/earnings-call-transcripts`) as an alternative to paid APIs.
+
+### Test script
+`research/issue_37_free_transcripts.py` — tests Motley Fool and company IR pages
+
+### Results
+
+| Ticker | Quarter | Words | Speaker Turns | Assessment |
+|--------|---------|-------|---------------|------------|
+| AAPL | Q2 FY2026 (Apr 30) | 8,023 | 59 | ✓ Full transcript |
+| MSFT | Q3 FY2026 (Apr 29) | 8,685 | 50 | ✓ Full transcript |
+| NVDA | Q1 FY2027 (May 20) | 8,233 | 32 | ✓ Full transcript |
+
+### Technical details
+- **Content selector:** `div.article-body.transcript-content`
+- **URL pattern:** `/earnings/call-transcripts/YYYY/MM/DD/{company}-{ticker}-{quarter}-{year}-earnings[-call]-transcript/`
+- The `-call-` infix is inconsistent across companies — must try both URL variants
+- Motley Fool's old search endpoint (`/search/solr.aspx`) is gone (HTTP 410)
+- Company IR pages (Apple, NVDA) return HTTP 403 — not viable for scraping
+
+### Company IR pages result
+- AAPL investor.apple.com: HTTP 403 — blocks scrapers
+- MSFT microsoft.com/investor: Returns a redirect link only, no transcript text
+- NVDA investor.nvidia.com: HTTP 403 — blocks scrapers
+
+---
+
+## Step 14 — Transcript Source Decision
+**Date:** June 21, 2026
+**Issue:** #11 ✅ Closed
+
+### Decision: Motley Fool as primary transcript source
+
+**Why Motley Fool wins:**
+
+| Source | Cost | Words | Speaker Data | Verdict |
+|--------|------|-------|-------------|---------|
+| **Motley Fool** | **$0** | ~8,000–9,000 | Partial (parseable) | ✓ Primary |
+| FMP Starter | ~$14/mo | Unknown | Flat string | Paid fallback |
+| Finnhub Starter | ~$50/mo | Unknown | Pre-parsed JSON | Too expensive for personal use |
+| SEC EDGAR 10-Q | $0 | ~3,500–4,500 | None | Supplement only |
+
+### Implementation plan
+- Fetch transcript page from `fool.com/earnings/call-transcripts/`
+- Parse `div.article-body.transcript-content` with BeautifulSoup
+- Speaker detection via `re.compile(r"^([A-Z][a-zA-Z\s\-\.]+?)(?:\s*[-—:])")`
+- FMP Starter (~$14/mo) as paid fallback if Motley Fool goes behind a paywall
+
+### What this unblocks
+Issue #3 (architecture design) can now begin — the primary data sources are confirmed:
+- **Prices:** yfinance (free) ✅ confirmed in Step 9
+- **Transcripts:** Motley Fool (free) ✅ confirmed in Step 13
+- **News:** TBD — issues #15, #16 still open (can run in parallel with architecture)
+
+---
+
 ## Current Status
 **Date:** June 21, 2026
 
@@ -450,26 +511,30 @@ Tested Finnhub's `/stock/transcripts` endpoint — the leading candidate identif
 | #8 | Test FMP free tier transcript endpoint for same 3 tickers | ✓ |
 | #10 | Confirm SEC EDGAR 10-Q/10-K fetch works as supplement | ✓ |
 | #7 | Test Finnhub /stock/transcripts endpoint for AAPL, MSFT, NVDA | ✓ |
+| #37 | Test free transcript scraping from Motley Fool and company IR pages | ✓ |
+| #11 | Decide on primary transcript source | ✓ Motley Fool ($0) |
 
-### Decision pending — Issue #11
-Pick primary transcript source before architecture design (#3) can begin:
-- **FMP Starter (~$14/mo)** — transcripts only, cheapest path
-- **Finnhub Starter (~$50/mo)** — transcripts + news + earnings calendar under one key
+### Data sources confirmed
+| Data Type | Source | Cost | Status |
+|-----------|--------|------|--------|
+| Stock prices (OHLCV) | yfinance | Free | ✓ Confirmed |
+| Earnings call transcripts | Motley Fool | Free | ✓ Confirmed |
+| News feed | TBD | TBD | #15, #16 open |
 
-### Issues open (P1 — start next)
-| # | Title |
-|---|-------|
-| #11 | Decide on primary transcript source |
-| #9 | Check transcript coverage for small/mid-cap stocks |
-| #13 | Confirm transcript rate limits cover a 10-stock portfolio |
-| #15 | Install finnlp and test Finnhub_Date_Range for 7-day news fetch |
-| #16 | Compare FinNLP/Finnhub news quality vs NewsAPI free tier |
-| #18 | Pull few-shot sentiment examples from FinGPT dataset |
-| #3 | Design project architecture (blocked by #11) |
+### Issues open (start next)
+| Priority | # | Title |
+|----------|---|-------|
+| P1 | #3 | Design project architecture ← **unblocked, start now** |
+| P1 | #15 | Install finnlp and test Finnhub_Date_Range for 7-day news fetch |
+| P1 | #16 | Compare FinNLP/Finnhub news quality vs NewsAPI free tier |
+| P1 | #9 | Check Motley Fool transcript coverage for small/mid-cap stocks |
+| P1 | #13 | Confirm transcript rate limits cover a 10-stock portfolio |
+| P1 | #18 | Pull few-shot sentiment examples from FinGPT dataset |
+| P2 | #19 | Decide on final news source |
 
 ### Dependency chain to first working build
 ```
-#11 (pick transcript source) → #9, #13 → #5 (earnings fetcher)
-#15 + #16 → #19 (decide news source) → #4 (weekly digest)
-#11 + #19 + #3 (architecture) → #4 + #5 → #6 (earnings summarizer)
+#3 (architecture) — start now, prices + transcripts confirmed
+#15 + #16 → #19 (decide news source) — run in parallel
+#3 + #19 → #4 (weekly digest) + #5 (earnings fetcher) → #6 (earnings summarizer)
 ```

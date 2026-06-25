@@ -357,3 +357,43 @@ FMP free tier is ruled out. Options remaining:
 - [ ] Decide on primary transcript source — FMP Starter ($14/mo) vs Finnhub Starter ($50/mo) → closes #11
 - [ ] Merge open PRs #34, #35, #36
 - [ ] Test FinNLP news fetch (#15) after transcript source confirmed
+
+### Motley Fool Free Transcript Test (Issue #37 ✅ Closed)
+
+User raised the idea of scraping transcripts for free rather than paying. Tested Motley Fool (`fool.com/earnings-call-transcripts`) as a free source.
+
+**Results — 3/3 tickers confirmed:**
+
+| Ticker | Quarter | Words | Speaker Turns |
+|--------|---------|-------|---------------|
+| AAPL | Q2 FY2026 | 8,023 | 59 |
+| MSFT | Q3 FY2026 | 8,685 | 50 |
+| NVDA | Q1 FY2027 | 8,233 | 32 |
+
+**Technical notes:**
+- Content selector: `div.article-body.transcript-content`
+- URL pattern: `/earnings/call-transcripts/YYYY/MM/DD/{company}-{ticker}-{quarter}-{year}-earnings[-call]-transcript/`
+- The `-call-` infix is inconsistent — must try both variants per ticker
+- Motley Fool's search endpoint is dead (HTTP 410); URLs built from known earnings dates
+- Company IR pages (Apple, NVDA): HTTP 403 — not viable
+
+### Transcript Source Decision (Issue #11 ✅ Closed)
+
+**Decision: Motley Fool as primary transcript source, $0/mo.**
+
+| Source | Cost | Result |
+|--------|------|--------|
+| Motley Fool | $0 | ✓ Full transcripts, 8,000+ words |
+| FMP free tier | $0 | ✗ 403 on all endpoints |
+| Finnhub free tier | $0 | ✗ 403 on all endpoints |
+| SEC EDGAR | $0 | ✗ No call transcripts (10-Q only) |
+| FMP Starter | ~$14/mo | Would work — paid fallback |
+| Finnhub Starter | ~$50/mo | Would work — too expensive for personal use |
+
+This unblocks **issue #3 (architecture design)** — both primary data sources are now confirmed (yfinance for prices, Motley Fool for transcripts).
+
+### Next Steps
+
+- [ ] Start architecture design — issue #3
+- [ ] Test news sources in parallel — issues #15, #16
+- [ ] Merge open PRs #34, #35, #36, #38
