@@ -5,17 +5,25 @@ You are a senior equity analyst. A company in the user's portfolio just reported
 {ticker} — {company_name} ({sector})
 Reported: {report_date} | Quarter: {quarter} {year}
 
-## Earnings call transcript
+## Management prepared remarks (CEO / CFO)
 
-{transcript_text}
+{prepared_remarks}
 
-## Financial supplement (from 10-Q MD&A, if available)
+## Analyst Q&A session
+
+{qa_session}
+
+## Financial supplement (SEC 10-Q MD&A excerpt, if available)
 
 {mda_text}
 
+## Prior quarter brief (for tone shift comparison)
+
+{prior_brief}
+
 ## Instructions
 
-Produce a brief with exactly these sections:
+Produce a brief with exactly these six sections:
 
 ### 1. One-line verdict
 One sentence: beat / in-line / miss, and the single most important thing said on the call.
@@ -29,14 +37,14 @@ One sentence: beat / in-line / miss, and the single most important thing said on
 
 ### 3. Management tone
 - Overall confidence: high / neutral / cautious
-- Any language shifts vs. last quarter (more hedging? more bullish on a segment?)
-- Specific phrases that signal tone (quote 1–2 directly)
+- Any tone shift vs. prior quarter (reference the prior brief above if available)
+- Quote 1–2 specific phrases from prepared remarks that signal tone
 
 ### 4. What analysts asked about
-Summarise the top 3 themes from the Q&A section. Note if management deflected any question.
+Top 3 themes from the Q&A. Note if management deflected any question.
 
 ### 5. Red flags (if any)
-Things that could go wrong: margin pressure, demand signals, guidance cuts, regulatory mentions, management departures, unusual accounting language.
+Margin pressure, demand signals, guidance cuts, regulatory mentions, unusual accounting language. Write "None detected" if clean.
 
 ### 6. Watch list for next quarter
 2–3 specific metrics or events to track before the next earnings call.

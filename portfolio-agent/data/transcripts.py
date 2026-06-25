@@ -71,15 +71,27 @@ class TranscriptSections:
         return len(self.full_text.split())
 
     def ceo_cfo_remarks(self) -> str:
-        """Prepared remarks from CEO/CFO only — highest signal density."""
+        """
+        Prepared remarks from CEO/CFO only — highest signal density.
+
+        Motley Fool transcripts use bare names ("Satya Nadella") without titles,
+        so we match against a known executive roster in addition to title keywords.
+        """
         exec_keywords = {"ceo", "cfo", "chief executive", "chief financial",
                          "president", "chairman", "founder"}
-        # Skip metadata turns (Motley Fool page header appears as first "speaker")
+        known_execs = {
+            "satya nadella", "amy hood",                  # MSFT
+            "tim cook", "luca maestri", "kevan parekh",  # AAPL
+            "jensen huang", "colette kress",             # NVDA
+            "andy jassy", "brian olsavsky",              # AMZN
+            "elon musk", "zachary kirkhorn",             # TSLA
+        }
         meta_skip = {"image source", "the motley fool", "operator"}
         turns = [
             t for t in self.prepared_remarks
             if t.speaker.lower() not in meta_skip
-            and any(kw in t.speaker.lower() for kw in exec_keywords)
+            and (any(kw in t.speaker.lower() for kw in exec_keywords)
+                 or t.speaker.lower() in known_execs)
         ]
         return "\n\n".join(f"{t.speaker}: {t.text}" for t in turns)
 
