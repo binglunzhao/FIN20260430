@@ -13,6 +13,7 @@ This module tries both variants and ±2 days around the earnings date automatica
 """
 
 import re
+import sys
 import time
 import requests
 import yfinance as yf
@@ -131,12 +132,14 @@ def fetch_transcript(ticker: str, year: int, quarter: int,
     if earnings_date is None:
         earnings_date = _get_earnings_date(ticker, year, quarter)
     if not earnings_date:
-        print(f"[transcripts] Could not determine earnings date for {ticker} Q{quarter} {year}")
+        print(f"[transcripts] Could not determine earnings date for {ticker} Q{quarter} {year}",
+              file=sys.stderr)
         return None
 
     slug = _company_slug(ticker)
     if not slug:
-        print(f"[transcripts] No company slug for {ticker} — add to _COMPANY_SLUGS")
+        print(f"[transcripts] No company slug for {ticker} — add to _COMPANY_SLUGS",
+              file=sys.stderr)
         return None
 
     # Try dates ±2 days — calls are sometimes posted the next day
@@ -151,7 +154,8 @@ def fetch_transcript(ticker: str, year: int, quarter: int,
                 sections = _parse_transcript(html)
                 if sections and sections.word_count > 500:
                     print(f"[transcripts] {ticker} Q{quarter} {year} — "
-                          f"{sections.word_count:,} words | {len(sections.qa_session)} Q&A turns")
+                          f"{sections.word_count:,} words | {len(sections.qa_session)} Q&A turns",
+                          file=sys.stderr)
                     return EarningsTranscript(
                         ticker=ticker,
                         year=year,
@@ -163,7 +167,7 @@ def fetch_transcript(ticker: str, year: int, quarter: int,
         time.sleep(0.3)
 
     print(f"[transcripts] No transcript found for {ticker} Q{quarter} {year} "
-          f"(tried dates around {earnings_date})")
+          f"(tried dates around {earnings_date})", file=sys.stderr)
     return None
 
 
