@@ -37,15 +37,17 @@ def weekly_returns(close: pd.DataFrame) -> pd.Series:
 
 def fetch_next_earnings_dates(tickers: List[str]) -> dict:
     """
-    Return {ticker: next_earnings_date} for each ticker using yfinance.
-    Used by the scheduler to detect upcoming earnings events.
+    Return {ticker: next_earnings_date (datetime.date) or None} using yfinance.
+    Used by the scheduler to detect upcoming earnings events and by the
+    weekly digest's upcoming-earnings section.
     """
     dates = {}
     for ticker in tickers:
         try:
+            # calendar["Earnings Date"] is a list of dates; earliest comes first
             info = yf.Ticker(ticker).calendar
-            if info is not None and "Earnings Date" in info:
-                dates[ticker] = info["Earnings Date"]
+            candidates = info.get("Earnings Date") if info else None
+            dates[ticker] = candidates[0] if candidates else None
         except Exception:
             dates[ticker] = None
         time.sleep(0.2)
