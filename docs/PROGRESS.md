@@ -538,3 +538,24 @@ Issue #3 (architecture design) can now begin — the primary data sources are co
 #15 + #16 → #19 (decide news source) — run in parallel
 #3 + #19 → #4 (weekly digest) + #5 (earnings fetcher) → #6 (earnings summarizer)
 ```
+
+---
+
+## Steps 15–18 — The Build (June 24 – July 1, 2026) *(catch-up summary, written July 6)*
+
+All four build issues shipped; the agent is functionally complete:
+
+| Step | Issue | What shipped | PR |
+|------|-------|-------------|----|
+| 15 | #3 ✅ | `portfolio-agent/` architecture — data/agents/prompts/delivery layers, scheduler, config | #39 |
+| 16 | #5 ✅ | Motley Fool transcript fetcher + speaker-turn parser | #40 |
+| 17 | #6 ✅ | Claude Opus earnings summarizer + `/earnings-deep-dive` skill; live briefs for AAPL/MSFT/NVDA | #41 |
+| 18 | #4 ✅ | Weekly digest engine — yfinance prices, **Finnhub `/company-news`** (resolves #15/#16/#19), SMTP delivery, `/weekly-digest` skill | #42 |
+
+**News source decision (supersedes the #15/#16/#19 research plan):** Finnhub's free-tier
+`/company-news` endpoint was implemented directly in `data/news.py` during the digest build —
+FinNLP was never needed.
+
+> **Note (July 6, 2026):** this file moved to `docs/` during the repo restructure. It is a
+> write-only narrative log — for current project state, trust `git log`, GitHub Issues, and
+> `CLAUDE.md` instead.

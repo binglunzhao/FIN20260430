@@ -397,3 +397,18 @@ This unblocks **issue #3 (architecture design)** — both primary data sources a
 - [ ] Start architecture design — issue #3
 - [ ] Test news sources in parallel — issues #15, #16
 - [ ] Merge open PRs #34, #35, #36, #38
+
+---
+
+## Sessions 8–10 — June 24 – July 1, 2026 *(catch-up summary, written July 6)*
+
+The full Portfolio Intelligence Agent was built across these sessions. Condensed record:
+
+- **June 24** — Merged outstanding research PRs (#34, #35, #36, #38)
+- **June 25** — **Architecture (#3 ✅)**: created `portfolio-agent/` package structure — `data/`, `agents/`, `prompts/`, `delivery/`, `scheduler.py`, `config.py`, `holdings.json` (PR #39). **Earnings fetcher (#5 ✅)**: Motley Fool transcript scraper + parser (PR #40). **Earnings summarizer (#6 ✅)**: Claude Opus deep-dive agent with 6-section brief template
+- **June 28** — `/earnings-deep-dive` Claude Code skill added; live briefs generated for AAPL, MSFT, NVDA into `portfolio-agent/outputs/` (PR #41)
+- **July 1** — **Weekly digest engine (#4 ✅)**: prices via yfinance, news via **Finnhub `/company-news` free tier** (this resolved the open news-source question — issues #15/#16/#19 obsoleted), email delivery, `/weekly-digest` skill (PR #42)
+
+> **Note (July 6, 2026):** this file moved to `docs/` during the repo restructure. It is a
+> write-only narrative log — for current project state, trust `git log`, GitHub Issues, and
+> `CLAUDE.md` instead.
