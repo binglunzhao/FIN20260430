@@ -1,5 +1,5 @@
 ---
-description: Generate a structured earnings deep-dive brief for a portfolio holding using Claude Opus 4.8 analysis. Fetches transcript from Motley Fool and MD&A from SEC EDGAR.
+description: Generate a structured earnings deep-dive brief for a portfolio holding. Fetches transcript from Motley Fool and MD&A from SEC EDGAR; analysis runs in Claude Code (no API key needed).
 argument-hint: TICKER YEAR QUARTER EARNINGS_DATE (e.g. MSFT 2026 3 2026-04-29)
 ---
 
@@ -76,3 +76,15 @@ BRIEF_EOF
 ```
 
 Confirm the file was saved and show the word count of the brief.
+
+## Step 5 — Offer email delivery (optional)
+
+Ask the user if they want the brief emailed. If yes, run:
+
+```bash
+python3 /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/delivery/send_file.py "Earnings Deep Dive — {TICKER} Q{QUARTER} FY{YEAR}" /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md
+```
+
+If it fails because SMTP is not configured, tell the user which .env keys are
+missing (SMTP_USER, SMTP_PASSWORD, EMAIL_TO) and move on — the brief is
+already saved.

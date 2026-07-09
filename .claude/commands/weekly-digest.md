@@ -44,10 +44,31 @@ Rules:
 - Tone: factual and direct, no fluff, no disclaimers
 - Length: 250–400 words total
 
-## Step 3 — Show the digest
+## Step 3 — Save and show the digest
+
+Save the digest for history (create the directory if needed):
+
+```bash
+mkdir -p /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests
+cat > /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md << 'DIGEST_EOF'
+{digest_content}
+DIGEST_EOF
+```
 
 Print the full digest to the user. Also show a one-line summary:
 - Week ending date
 - Portfolio return
 - Biggest winner and biggest loser
 - Any earnings coming up
+
+## Step 4 — Offer email delivery (optional)
+
+Ask the user if they want the digest emailed. If yes, run:
+
+```bash
+python3 /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/delivery/send_file.py "Weekly Portfolio Digest — {week_end}" /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md
+```
+
+If it fails because SMTP is not configured, tell the user which .env keys are
+missing (SMTP_USER, SMTP_PASSWORD, EMAIL_TO) and move on — the digest is
+already saved and shown.
