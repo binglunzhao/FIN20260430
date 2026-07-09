@@ -22,7 +22,11 @@ from data.prices import fetch_weekly_prices, weekly_returns, fetch_next_earnings
 from data.news import fetch_recent_news
 
 
-def main():
+def build_payload() -> dict:
+    """
+    Assemble the digest data contract consumed by the /weekly-digest skill.
+    Keys documented in .claude/commands/weekly-digest.md — keep them in sync.
+    """
     print("Fetching portfolio data...", file=sys.stderr)
 
     # Prices
@@ -59,7 +63,7 @@ def main():
     print("  Upcoming earnings...", file=sys.stderr)
     upcoming = _upcoming_earnings(config.TICKERS)
 
-    result = {
+    return {
         "week_start": week_start,
         "week_end": week_end,
         "portfolio_return_pct": round(portfolio_return, 2),
@@ -69,7 +73,9 @@ def main():
         "upcoming_earnings": upcoming,
     }
 
-    print(json.dumps(result))
+
+def main():
+    print(json.dumps(build_payload()))
     print("Done.", file=sys.stderr)
 
 

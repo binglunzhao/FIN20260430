@@ -5,8 +5,14 @@
 Workspace for AI engineering projects in financial services. The main deliverable is the
 **Portfolio Intelligence Agent** (`portfolio-agent/`) — a built, working agent with two modes:
 
-- **Weekly Digest** (Fridays 5:30pm ET): price moves + news commentary per holding, via Claude Sonnet
-- **Earnings Deep Dive** (event-triggered): structured 6-section brief when a holding reports, via Claude Opus
+- **Weekly Digest** (`/weekly-digest`): price moves + news commentary per holding
+- **Earnings Deep Dive** (`/earnings-deep-dive`): structured 6-section brief when a holding reports
+
+**Analysis runs inside Claude Code via the two skills — there is no Anthropic API key
+anywhere.** The Python layer only fetches data (prices/news/transcripts/filings) and emits
+JSON; Claude Code does the reasoning. The old direct-API path (agents/ + prompts/, model
+constants in config.py) is archived at `archive/api-path/` with a restoration README — do
+not re-implement it, restore from there if ever needed.
 
 The repo also holds a project-ideas document ([docs/PROJECT_IDEAS.md](docs/PROJECT_IDEAS.md), 7 AI agent
 ideas) from which this agent came (it merges ideas #3 and #5).
@@ -15,21 +21,21 @@ ideas) from which this agent came (it merges ideas #3 and #5).
 
 | Path | Purpose |
 |------|---------|
-| `portfolio-agent/main.py` | Entry point — `--digest`, `--earnings`, or continuous scheduler |
-| `portfolio-agent/scheduler.py` | Friday digest trigger + daily 9am earnings-date check |
-| `portfolio-agent/config.py` | Loads `.env` + `holdings.json`; model constants live here |
-| `portfolio-agent/holdings.json` | Portfolio (tickers/shares/sector) + settings (digest time, thresholds) |
+| `.claude/commands/` | **The agent's interface**: `/weekly-digest` and `/earnings-deep-dive` slash commands (analysis instructions live here) |
+| `portfolio-agent/data/fetch_digest_for_skill.py` | Digest data payload (JSON contract consumed by `/weekly-digest`; `build_payload()` is tested) |
+| `portfolio-agent/data/fetch_for_skill.py` | Deep-dive data payload (transcript + MD&A JSON for `/earnings-deep-dive`) |
 | `portfolio-agent/data/prices.py` | yfinance OHLCV, weekly returns, next earnings dates |
 | `portfolio-agent/data/transcripts.py` | Motley Fool earnings-call transcript scraper + parser |
 | `portfolio-agent/data/news.py` | Finnhub `/company-news` (free tier) |
 | `portfolio-agent/data/edgar.py` | SEC EDGAR 10-Q MD&A extraction (supplement) |
-| `portfolio-agent/data/fetch_for_skill.py`, `fetch_digest_for_skill.py` | JSON bridges for the Claude Code skills |
-| `portfolio-agent/agents/weekly_digest.py`, `earnings_deep_dive.py` | Prompt build → Claude call → email/save |
-| `portfolio-agent/prompts/*.txt` | Prompt templates (placeholders must match `_build_prompt` in each agent) |
-| `portfolio-agent/delivery/email.py` | stdlib SMTP send (markdown → basic HTML) |
-| `portfolio-agent/outputs/` | Generated earnings briefs (`{TICKER}_{YEAR}_Q{Q}.md`) |
+| `portfolio-agent/main.py`, `scheduler.py` | Reminder-only: daily earnings-date check + Friday digest nudge (never generates) |
+| `portfolio-agent/config.py` | Loads `.env` + `holdings.json`; `email_configured()` / `validate_email()` |
+| `portfolio-agent/holdings.json` | Portfolio (tickers/shares/sector) + settings (digest time, thresholds) |
+| `portfolio-agent/delivery/mailer.py`, `send_file.py` | stdlib SMTP send; `send_file.py` emails a saved markdown file (optional skill step) |
+| `portfolio-agent/outputs/` | Earnings briefs (`{TICKER}_{YEAR}_Q{Q}.md`) + weekly digests (`digests/{date}.md`) |
+| `archive/api-path/` | Archived direct-Anthropic-API generation path (agents/, prompts/, old scheduler) — see its README to restore |
+| `tests/` | Offline pytest suite (fixtures in `tests/fixtures/`) |
 | `research/issue_*.py` | One-off validation scripts from the research phase (not tests) |
-| `.claude/commands/` | `/weekly-digest` and `/earnings-deep-dive` slash commands |
 
 ## Locked decisions (do not re-research)
 
@@ -41,20 +47,25 @@ ideas) from which this agent came (it merges ideas #3 and #5).
 | Financials | SEC EDGAR 10-Q MD&A | free | supplement only — no Q&A, 40–45 day lag (#10) |
 | Rejected | FMP / Finnhub transcript APIs | — | free tiers 403 on all transcript endpoints (#7, #8) |
 
-Models are constants in `portfolio-agent/config.py`: `WEEKLY_DIGEST_MODEL` (Sonnet) and
-`EARNINGS_DEEPDIVE_MODEL` (Opus). Change them there, nowhere else.
+There are no model constants: whatever model Claude Code is running does the analysis.
 
 ## How to run
 
+The agent IS the two Claude Code skills:
+
+- `/weekly-digest` — no args; fetches data, writes the digest, saves to `outputs/digests/`, offers email
+- `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE` — 6-section brief, saved to `outputs/`, offers email
+
+Setup and optional reminder scheduler:
+
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # fill in ANTHROPIC_API_KEY, SMTP creds, EMAIL_TO, FINNHUB_API_KEY
-python3 portfolio-agent/main.py --digest     # weekly digest now
-python3 portfolio-agent/main.py --earnings   # earnings check now
-python3 portfolio-agent/main.py              # continuous scheduler
+cp .env.example .env   # FINNHUB_API_KEY for news; SMTP creds only if you want email
+python3 portfolio-agent/main.py --earnings   # one-shot earnings reminder check (cron-friendly)
+python3 portfolio-agent/main.py              # continuous reminders (Fri digest nudge + daily earnings check)
 ```
 
-Claude Code skills: `/weekly-digest` (no args) and `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE`.
+Tests: `python3 -m pytest tests/` (offline, no credentials needed).
 
 ## Workflow conventions
 

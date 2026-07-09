@@ -1,17 +1,21 @@
 """
-Scheduler — runs the agent locally using the `schedule` library.
+Scheduler — reminder-only. Analysis happens inside Claude Code via the
+/weekly-digest and /earnings-deep-dive skills; this module never generates
+anything and needs no Anthropic API key.
 
-Two triggers:
-  1. Weekly Digest  — every Friday at 17:30 ET
-  2. Earnings check — daily at 09:00 ET; fires Earnings Deep Dive
-                      if a holding reports earnings within the next 24 hours
+Two reminders:
+  1. Earnings check — daily at 09:00 ET; if a holding reports today or
+     tomorrow, tells you the exact /earnings-deep-dive command to run
+  2. Digest nudge  — every Friday at 17:30 ET; reminds you to run /weekly-digest
+
+Reminders print to stdout and are additionally emailed when SMTP is configured
+in .env (optional — see .env.example).
 
 Run:
-  pip install schedule
-  python3 portfolio-agent/scheduler.py
+  python3 portfolio-agent/main.py --earnings   # one-shot earnings check (cron-friendly)
+  python3 portfolio-agent/main.py              # continuous reminder mode
 
-For production: replace with a cron job or AWS EventBridge.
-  Cron equivalent: 30 17 * * 5 python3 /path/to/portfolio-agent/scheduler.py --digest
+The old generating scheduler is archived at archive/api-path/scheduler_api.py.
 """
 
 import time
@@ -20,56 +24,74 @@ from datetime import date, timedelta
 
 import schedule
 
-from agents.weekly_digest import run as run_digest
-from agents.earnings_deep_dive import run as run_deep_dive
 from data.prices import fetch_next_earnings_dates
+from delivery.mailer import send
 import config
 
 
 def check_earnings() -> None:
     """
     Check if any holding reports earnings today or tomorrow.
-    If so, trigger the Earnings Deep Dive after market close (5pm ET).
+    If so, remind the user to run the /earnings-deep-dive skill after the call.
     """
     upcoming = fetch_next_earnings_dates(config.TICKERS)
     today = date.today()
     tomorrow = today + timedelta(days=1)
 
-    for ticker, earnings_date in upcoming.items():
-        if earnings_date in (today, tomorrow):
-            print(f"[scheduler] {ticker} reports on {earnings_date} — queuing deep dive")
-            # Determine quarter from month
-            month = earnings_date.month
-            quarter = (month - 1) // 3 + 1
-            run_deep_dive(
-                ticker=ticker,
-                year=earnings_date.year,
-                quarter=quarter,
-                report_date=earnings_date.isoformat(),
-            )
+    due = {t: d for t, d in upcoming.items() if d in (today, tomorrow)}
+    if not due:
+        print(f"[scheduler] No holdings report earnings on {today} or {tomorrow}")
+        return
+
+    lines = []
+    for ticker, earnings_date in due.items():
+        quarter = (earnings_date.month - 1) // 3 + 1
+        lines.append(
+            f"{ticker} reports on {earnings_date}. After the call, run:\n"
+            f"  /earnings-deep-dive {ticker} {earnings_date.year} {quarter} {earnings_date.isoformat()}"
+        )
+    _notify("Earnings reminder — " + ", ".join(due), "\n\n".join(lines))
+
+
+def digest_reminder() -> None:
+    """Friday nudge to run the weekly digest skill."""
+    _notify(
+        "Weekly digest reminder",
+        "Markets are closed for the week. Open Claude Code and run /weekly-digest "
+        "to generate this week's portfolio digest.",
+    )
+
+
+def _notify(subject: str, body: str) -> None:
+    """Print the reminder; also email it when SMTP is configured."""
+    print(f"[scheduler] {subject}\n{body}")
+    if config.email_configured():
+        try:
+            send(subject=subject, body_markdown=body)
+            print("[scheduler] Reminder emailed")
+        except Exception as e:
+            print(f"[scheduler] Email failed ({e}) — reminder printed above")
+    else:
+        print("[scheduler] (email not configured — set SMTP_USER/SMTP_PASSWORD/EMAIL_TO to receive these by mail)")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--digest",   action="store_true", help="Run weekly digest now")
-    parser.add_argument("--earnings", action="store_true", help="Run earnings check now")
+    parser.add_argument("--earnings", action="store_true", help="Run earnings reminder check now")
     args = parser.parse_args()
 
     # One-shot CLI mode (useful for testing and cron)
-    if args.digest:
-        run_digest()
-        return
     if args.earnings:
         check_earnings()
         return
 
-    # Continuous scheduler mode
-    print("Portfolio Intelligence Agent scheduler started.")
+    # Continuous reminder mode
+    print("Portfolio Intelligence Agent reminder scheduler started.")
     print(f"  Holdings: {config.TICKERS}")
-    print(f"  Weekly digest: every Friday at {config.SETTINGS['digest_time']} ET")
+    print(f"  Digest nudge: every Friday at {config.SETTINGS['digest_time']} ET")
     print(f"  Earnings check: daily at 09:00 ET")
 
-    schedule.every().friday.at(config.SETTINGS["digest_time"]).do(run_digest)
+    schedule.every().friday.at(config.SETTINGS["digest_time"]).do(digest_reminder)
     schedule.every().day.at("09:00").do(check_earnings)
 
     while True:

@@ -17,15 +17,11 @@ if _env_path.exists():
             key, _, val = line.partition("=")
             os.environ.setdefault(key.strip(), val.strip())
 
-# ── Claude API ────────────────────────────────────────────────────────────────
+# NOTE: analysis runs inside Claude Code via the /weekly-digest and
+# /earnings-deep-dive skills — no Anthropic API key is needed anywhere.
+# The old direct-API path is archived in archive/api-path/ (see its README).
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-
-# Model selection per mode (see README.md model guide)
-WEEKLY_DIGEST_MODEL   = "claude-sonnet-4-6"   # balanced speed/quality
-EARNINGS_DEEPDIVE_MODEL = "claude-opus-4-8"   # complex reasoning, full transcript
-
-# ── Email delivery ────────────────────────────────────────────────────────────
+# ── Email delivery (optional — only for emailed digests/reminders) ───────────
 
 SMTP_HOST     = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
@@ -54,17 +50,20 @@ SETTINGS   = _holdings_data["settings"]
 
 # ── Validation ────────────────────────────────────────────────────────────────
 
-def validate():
-    """Raise if required config is missing before running the agent."""
+def email_configured() -> bool:
+    """True if SMTP credentials are present (email is an optional feature)."""
+    return bool(SMTP_USER and SMTP_PASSWORD and EMAIL_TO)
+
+
+def validate_email():
+    """Raise if email delivery is requested but SMTP config is missing."""
     missing = []
-    if not ANTHROPIC_API_KEY:
-        missing.append("ANTHROPIC_API_KEY")
     if not SMTP_USER or not SMTP_PASSWORD:
         missing.append("SMTP_USER / SMTP_PASSWORD")
     if not EMAIL_TO:
         missing.append("EMAIL_TO")
     if missing:
         raise EnvironmentError(
-            f"Missing required config: {', '.join(missing)}\n"
+            f"Missing email config: {', '.join(missing)}\n"
             "Add them to your .env file — see .env.example for the template."
         )

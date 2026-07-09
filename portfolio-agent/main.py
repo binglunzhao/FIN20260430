@@ -1,10 +1,12 @@
 """
-Portfolio Intelligence Agent — entry point.
+Portfolio Intelligence Agent — entry point (reminder-only).
+
+Analysis runs inside Claude Code: /weekly-digest and /earnings-deep-dive.
+This process only sends reminders about when to run them.
 
 Usage:
-  python3 portfolio-agent/main.py --digest        # run weekly digest now
-  python3 portfolio-agent/main.py --earnings      # run earnings check now
-  python3 portfolio-agent/main.py                 # start continuous scheduler
+  python3 portfolio-agent/main.py --earnings      # earnings reminder check now
+  python3 portfolio-agent/main.py                 # continuous reminder scheduler
 
 See scheduler.py for trigger logic and README for full setup instructions.
 """
