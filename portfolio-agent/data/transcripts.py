@@ -82,7 +82,8 @@ class TranscriptSections:
                          "president", "chairman", "founder"}
         known_execs = {
             "satya nadella", "amy hood",                  # MSFT
-            "tim cook", "luca maestri", "kevan parekh",  # AAPL
+            "tim cook", "timothy d. cook", "timothy cook",
+            "luca maestri", "kevan parekh",              # AAPL
             "jensen huang", "colette kress",             # NVDA
             "andy jassy", "brian olsavsky",              # AMZN
             "elon musk", "zachary kirkhorn",             # TSLA
@@ -265,8 +266,15 @@ def _parse_transcript(html: str) -> Optional[TranscriptSections]:
 
 
 def _extract_speaker_turns(paragraphs: list[str]) -> list[SpeakerTurn]:
-    """Detect speaker turns from Motley Fool paragraph list."""
-    pattern = re.compile(r"^([A-Z][a-zA-Z\s\-\.]+?)(?:\s*[-—:]\s*)(.*)", re.DOTALL)
+    """
+    Detect speaker turns from Motley Fool paragraph list.
+
+    Separator must be a colon, double hyphen, em-dash, or space-surrounded
+    hyphen. A bare hyphen would false-match hyphenated words: a paragraph
+    opening "Our Services revenue reached an all-time high" once became a
+    phantom 807-word speaker named "Our Services revenue reached an all".
+    """
+    pattern = re.compile(r"^([A-Z][a-zA-Z\s\-\.]+?)(?:\s*(?::|--|—)\s*|\s+-\s+)(.*)", re.DOTALL)
     turns = []
     current_speaker: Optional[str] = None
     current_text: list[str] = []

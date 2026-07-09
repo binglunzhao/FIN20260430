@@ -83,17 +83,30 @@ def _extract_mda(filing_url: str) -> Optional[str]:
     resp = requests.get(filing_url, headers=HEADERS, timeout=15)
     if resp.status_code != 200:
         return None
+    return _extract_mda_from_html(resp.text)
 
-    text = re.sub(r"<[^>]+>", " ", resp.text)
+
+def _extract_mda_from_html(raw_html: str) -> Optional[str]:
+    """
+    Extract the MD&A section from raw 10-Q HTML.
+
+    The MD&A heading phrase appears several times per filing: table of contents,
+    cross-references in the forward-looking-statements note, and the section
+    itself. Bodies cut off by the Item 3/4 boundary regex are short for all but
+    the real section, so take the LONGEST body rather than the first one past a
+    word floor (a first-match rule picked a 180-word cross-reference in MSFT's
+    10-Q — issue #53).
+    """
+    text = re.sub(r"<[^>]+>", " ", raw_html)
     text = re.sub(r"&nbsp;|&#\d+;", " ", text)
     text = re.sub(r"\s{2,}", " ", text).strip()
 
-    # Find MD&A — skip TOC entries (< 100 words) and take the first substantial match
+    best: Optional[str] = None
     for match in re.finditer(r"management.{0,50}discussion.{0,50}analysis", text, re.IGNORECASE):
         tail = text[match.end(): match.end() + 60000]
         body = re.split(r"item\s+[34][^a-z]|quantitative and qualitative",
-                        tail, maxsplit=1, flags=re.IGNORECASE)[0]
-        if len(body.split()) >= 100:
-            return body.strip()
+                        tail, maxsplit=1, flags=re.IGNORECASE)[0].strip()
+        if len(body.split()) >= 100 and (best is None or len(body) > len(best)):
+            best = body
 
-    return None
+    return best
