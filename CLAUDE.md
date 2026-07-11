@@ -29,11 +29,12 @@ ideas) from which this agent came (it merges ideas #3 and #5).
 | `portfolio-agent/data/news.py` | Finnhub `/company-news` (free tier) |
 | `portfolio-agent/data/edgar.py` | SEC EDGAR 10-Q MD&A extraction (supplement) |
 | `portfolio-agent/main.py`, `scheduler.py` | Reminder-only: daily earnings-date check + Friday digest nudge (never generates) |
-| `portfolio-agent/config.py` | Loads `.env` + `holdings.json`; `email_configured()` / `validate_email()` |
+| `portfolio-agent/config.py` | Loads `.env` + `holdings.json` |
 | `portfolio-agent/holdings.json` | Portfolio (tickers/shares/sector) + settings (digest time, thresholds) |
-| `portfolio-agent/delivery/mailer.py`, `send_file.py` | stdlib SMTP send; `send_file.py` emails a saved markdown file (optional skill step) |
+| `portfolio-agent/delivery/render_pdf.py` | markdown → styled HTML (stdlib converter) → PDF via headless Chrome; final step of both skills |
 | `portfolio-agent/outputs/` | Earnings briefs (`{TICKER}_{YEAR}_Q{Q}.md`) + weekly digests (`digests/{date}.md`) |
 | `archive/api-path/` | Archived direct-Anthropic-API generation path (agents/, prompts/, old scheduler) — see its README to restore |
+| `archive/email-delivery/` | Archived SMTP email path (mailer.py, send_file.py) — parked in favor of PDF delivery (#64); see its README to restore |
 | `tests/` | Offline pytest suite (fixtures in `tests/fixtures/`) |
 | `research/issue_*.py` | One-off validation scripts from the research phase (not tests) |
 
@@ -53,14 +54,14 @@ There are no model constants: whatever model Claude Code is running does the ana
 
 The agent IS the two Claude Code skills:
 
-- `/weekly-digest` — no args; fetches data, writes the digest, saves to `outputs/digests/`, offers email
-- `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE` — 6-section brief, saved to `outputs/`, offers email
+- `/weekly-digest` — no args; fetches data, writes the digest, saves to `outputs/digests/` as markdown + PDF
+- `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE` — 6-section brief, saved to `outputs/` as markdown + PDF
 
 Setup and optional reminder scheduler:
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # FINNHUB_API_KEY for news; SMTP creds only if you want email
+cp .env.example .env   # FINNHUB_API_KEY for news
 python3 portfolio-agent/main.py --earnings   # one-shot earnings reminder check (cron-friendly)
 python3 portfolio-agent/main.py              # continuous reminders (Fri digest nudge + daily earnings check)
 ```

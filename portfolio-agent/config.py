@@ -21,13 +21,8 @@ if _env_path.exists():
 # /earnings-deep-dive skills — no Anthropic API key is needed anywhere.
 # The old direct-API path is archived in archive/api-path/ (see its README).
 
-# ── Email delivery (optional — only for emailed digests/reminders) ───────────
-
-SMTP_HOST     = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER     = os.environ.get("SMTP_USER", "")       # Gmail address
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")   # Gmail app password
-EMAIL_TO      = os.environ.get("EMAIL_TO", "")        # recipient address
+# NOTE: email delivery (SMTP) is archived at archive/email-delivery/ — outputs
+# are delivered as local PDFs instead (delivery/render_pdf.py).
 
 # ── Data sources ──────────────────────────────────────────────────────────────
 
@@ -47,23 +42,3 @@ _holdings_data = json.loads(_holdings_path.read_text())
 HOLDINGS   = _holdings_data["portfolio"]   # list of {ticker, shares, sector}
 TICKERS    = [h["ticker"] for h in HOLDINGS]
 SETTINGS   = _holdings_data["settings"]
-
-# ── Validation ────────────────────────────────────────────────────────────────
-
-def email_configured() -> bool:
-    """True if SMTP credentials are present (email is an optional feature)."""
-    return bool(SMTP_USER and SMTP_PASSWORD and EMAIL_TO)
-
-
-def validate_email():
-    """Raise if email delivery is requested but SMTP config is missing."""
-    missing = []
-    if not SMTP_USER or not SMTP_PASSWORD:
-        missing.append("SMTP_USER / SMTP_PASSWORD")
-    if not EMAIL_TO:
-        missing.append("EMAIL_TO")
-    if missing:
-        raise EnvironmentError(
-            f"Missing email config: {', '.join(missing)}\n"
-            "Add them to your .env file — see .env.example for the template."
-        )

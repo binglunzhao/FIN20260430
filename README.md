@@ -11,13 +11,16 @@ fetches data from free sources; Claude Code does the reasoning via two slash com
   (verdict, key numbers, management tone, analyst themes, red flags, watch list).
   Saved to `portfolio-agent/outputs/`.
 
-Both commands offer optional email delivery at the end (Gmail SMTP).
+Both commands finish by rendering the output to PDF (saved next to the markdown,
+via headless Chrome — no extra dependencies). Email delivery is archived at
+[archive/email-delivery/](archive/email-delivery/); a visual tracking dashboard is the
+next planned delivery surface (#67).
 
 ## Quickstart
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env    # FINNHUB_API_KEY for news; SMTP creds only if you want email
+cp .env.example .env    # FINNHUB_API_KEY for news
 ```
 
 Then open Claude Code in this repo and run `/weekly-digest`.
@@ -34,7 +37,7 @@ python3 portfolio-agent/main.py --digest-reminder   # one-shot: Friday digest nu
 python3 portfolio-agent/main.py                     # continuous: both reminders in a loop
 ```
 
-Reminders print to the terminal and are also emailed when SMTP is configured.
+Reminders print to the terminal (and to the launchd log when scheduled).
 
 **Run automatically (macOS launchd):**
 
@@ -60,13 +63,14 @@ portfolio-agent/
 ├── data/              # prices (yfinance), transcripts (Motley Fool),
 │                      # news (Finnhub), filings (SEC EDGAR),
 │                      # fetch_*_for_skill.py JSON bridges for the skills
-├── delivery/          # SMTP email + send_file.py (optional email step)
+├── delivery/          # render_pdf.py — markdown → PDF via headless Chrome
 ├── main.py            # reminder entry point (never generates)
 ├── scheduler.py       # Friday digest nudge + daily earnings-date check
 ├── config.py          # env loading, holdings
 ├── holdings.json      # portfolio + settings
 └── outputs/           # earnings briefs + digests/ history
 archive/api-path/      # archived direct-Anthropic-API path (restorable — see its README)
+archive/email-delivery/ # archived SMTP email path (restorable — see its README)
 tests/                 # offline pytest suite with real-page fixtures
 research/              # data-source validation scripts from the research phase
 docs/                  # project ideas, progress log, session history
