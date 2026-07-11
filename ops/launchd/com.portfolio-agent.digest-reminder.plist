@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.portfolio-agent.digest-reminder</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>portfolio-agent/main.py</string>
+        <string>--digest-reminder</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/binglunzhao/Projects/FIN20260430</string>
+
+    <!-- Fridays at 17:30 local time (Weekday 5 = Friday) -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>5</integer>
+        <key>Hour</key>
+        <integer>17</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/binglunzhao/Library/Logs/portfolio-agent-reminders.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/binglunzhao/Library/Logs/portfolio-agent-reminders.log</string>
+</dict>
+</plist>

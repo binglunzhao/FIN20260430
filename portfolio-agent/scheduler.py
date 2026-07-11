@@ -78,11 +78,15 @@ def _notify(subject: str, body: str) -> None:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--earnings", action="store_true", help="Run earnings reminder check now")
+    parser.add_argument("--digest-reminder", action="store_true", help="Send the weekly digest nudge now")
     args = parser.parse_args()
 
-    # One-shot CLI mode (useful for testing and cron)
+    # One-shot CLI mode (used by the launchd agents in ops/launchd/ and cron)
     if args.earnings:
         check_earnings()
+        return
+    if args.digest_reminder:
+        digest_reminder()
         return
 
     # Continuous reminder mode

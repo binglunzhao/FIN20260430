@@ -22,7 +22,7 @@ If any argument is missing, ask the user before proceeding.
 Run this command to fetch the transcript and EDGAR data:
 
 ```bash
-cd /Users/binglunzhao/Desktop/FIN20260430 && python3 portfolio-agent/data/fetch_for_skill.py {TICKER} {YEAR} {QUARTER} {EARNINGS_DATE}
+cd /Users/binglunzhao/Projects/FIN20260430 && python3 portfolio-agent/data/fetch_for_skill.py {TICKER} {YEAR} {QUARTER} {EARNINGS_DATE}
 ```
 
 The script prints a JSON object to stdout. Parse it and extract:
@@ -69,7 +69,7 @@ Keep each section tight. No padding. Total length: 400–600 words.
 Save the brief to the outputs directory:
 
 ```bash
-cat > /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md << 'BRIEF_EOF'
+cat > /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md << 'BRIEF_EOF'
 <!-- source: {source_url} -->
 {brief_content}
 BRIEF_EOF
@@ -82,7 +82,7 @@ Confirm the file was saved and show the word count of the brief.
 Ask the user if they want the brief emailed. If yes, run:
 
 ```bash
-python3 /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/delivery/send_file.py "Earnings Deep Dive — {TICKER} Q{QUARTER} FY{YEAR}" /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/send_file.py "Earnings Deep Dive — {TICKER} Q{QUARTER} FY{YEAR}" /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md
 ```
 
 If it fails because SMTP is not configured, tell the user which .env keys are
