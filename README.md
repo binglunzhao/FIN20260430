@@ -29,11 +29,28 @@ Holdings and settings live in [portfolio-agent/holdings.json](portfolio-agent/ho
 The scheduler never generates anything — it just tells you when to run the skills:
 
 ```bash
-python3 portfolio-agent/main.py --earnings   # one-shot: does any holding report today/tomorrow?
-python3 portfolio-agent/main.py              # continuous: Friday digest nudge + daily earnings check
+python3 portfolio-agent/main.py --earnings          # one-shot: does any holding report today/tomorrow?
+python3 portfolio-agent/main.py --digest-reminder   # one-shot: Friday digest nudge
+python3 portfolio-agent/main.py                     # continuous: both reminders in a loop
 ```
 
 Reminders print to the terminal and are also emailed when SMTP is configured.
+
+**Run automatically (macOS launchd):**
+
+```bash
+./ops/install_reminders.sh          # install + load both agents
+./ops/install_reminders.sh remove   # uninstall
+```
+
+This schedules the earnings check daily at 09:00 and the digest nudge Fridays at 17:30
+(local machine time). Logs go to `~/Library/Logs/portfolio-agent-reminders.log`; force a
+test run with `launchctl kickstart gui/$(id -u)/com.portfolio-agent.earnings-reminder`.
+
+> **Note:** macOS blocks launchd jobs from reading `~/Desktop`, `~/Documents`, and
+> `~/Downloads` (TCC privacy protection). This repo must live outside those folders —
+> it's at `~/Projects/FIN20260430`. The absolute paths in `ops/launchd/*.plist` and
+> `.claude/commands/*.md` must match the repo location.
 
 ## Repo layout
 

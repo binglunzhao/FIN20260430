@@ -10,7 +10,7 @@ You are a personal portfolio analyst. Generate the weekly portfolio digest.
 Run this command to fetch prices, news, and upcoming earnings for all holdings:
 
 ```bash
-cd /Users/binglunzhao/Desktop/FIN20260430 && python3 portfolio-agent/data/fetch_digest_for_skill.py 2>/dev/null
+cd /Users/binglunzhao/Projects/FIN20260430 && python3 portfolio-agent/data/fetch_digest_for_skill.py 2>/dev/null
 ```
 
 The script prints a JSON object to stdout. Parse it and extract:
@@ -49,8 +49,8 @@ Rules:
 Save the digest for history (create the directory if needed):
 
 ```bash
-mkdir -p /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests
-cat > /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md << 'DIGEST_EOF'
+mkdir -p /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/digests
+cat > /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md << 'DIGEST_EOF'
 {digest_content}
 DIGEST_EOF
 ```
@@ -66,7 +66,7 @@ Print the full digest to the user. Also show a one-line summary:
 Ask the user if they want the digest emailed. If yes, run:
 
 ```bash
-python3 /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/delivery/send_file.py "Weekly Portfolio Digest — {week_end}" /Users/binglunzhao/Desktop/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/send_file.py "Weekly Portfolio Digest — {week_end}" /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md
 ```
 
 If it fails because SMTP is not configured, tell the user which .env keys are
