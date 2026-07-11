@@ -61,14 +61,14 @@ Print the full digest to the user. Also show a one-line summary:
 - Biggest winner and biggest loser
 - Any earnings coming up
 
-## Step 4 — Offer email delivery (optional)
+## Step 4 — Render the PDF
 
-Ask the user if they want the digest emailed. If yes, run:
+Render the saved digest to PDF (written next to the markdown file):
 
 ```bash
-python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/send_file.py "Weekly Portfolio Digest — {week_end}" /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/render_pdf.py /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/digests/{week_end}.md
 ```
 
-If it fails because SMTP is not configured, tell the user which .env keys are
-missing (SMTP_USER, SMTP_PASSWORD, EMAIL_TO) and move on — the digest is
-already saved and shown.
+Report the saved PDF path to the user. If rendering fails (e.g. no
+Chromium-based browser found), show the error and move on — the markdown
+digest is already saved and shown.

@@ -8,8 +8,7 @@ Two reminders:
      tomorrow, tells you the exact /earnings-deep-dive command to run
   2. Digest nudge  — every Friday at 17:30 ET; reminds you to run /weekly-digest
 
-Reminders print to stdout and are additionally emailed when SMTP is configured
-in .env (optional — see .env.example).
+Reminders print to stdout (email delivery is archived at archive/email-delivery/).
 
 Run:
   python3 portfolio-agent/main.py --earnings   # one-shot earnings check (cron-friendly)
@@ -25,7 +24,6 @@ from datetime import date, timedelta
 import schedule
 
 from data.prices import fetch_next_earnings_dates
-from delivery.mailer import send
 import config
 
 
@@ -63,16 +61,8 @@ def digest_reminder() -> None:
 
 
 def _notify(subject: str, body: str) -> None:
-    """Print the reminder; also email it when SMTP is configured."""
+    """Print the reminder to stdout (shows up in the launchd logs)."""
     print(f"[scheduler] {subject}\n{body}")
-    if config.email_configured():
-        try:
-            send(subject=subject, body_markdown=body)
-            print("[scheduler] Reminder emailed")
-        except Exception as e:
-            print(f"[scheduler] Email failed ({e}) — reminder printed above")
-    else:
-        print("[scheduler] (email not configured — set SMTP_USER/SMTP_PASSWORD/EMAIL_TO to receive these by mail)")
 
 
 def main():

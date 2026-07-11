@@ -77,14 +77,14 @@ BRIEF_EOF
 
 Confirm the file was saved and show the word count of the brief.
 
-## Step 5 — Offer email delivery (optional)
+## Step 5 — Render the PDF
 
-Ask the user if they want the brief emailed. If yes, run:
+Render the saved brief to PDF (written next to the markdown file):
 
 ```bash
-python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/send_file.py "Earnings Deep Dive — {TICKER} Q{QUARTER} FY{YEAR}" /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/render_pdf.py /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/outputs/{TICKER}_{YEAR}_Q{QUARTER}.md
 ```
 
-If it fails because SMTP is not configured, tell the user which .env keys are
-missing (SMTP_USER, SMTP_PASSWORD, EMAIL_TO) and move on — the brief is
+Report the saved PDF path to the user. If rendering fails (e.g. no
+Chromium-based browser found), show the error and move on — the brief is
 already saved.
