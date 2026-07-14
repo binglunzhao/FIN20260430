@@ -31,7 +31,8 @@ ideas) from which this agent came (it merges ideas #3 and #5).
 | `portfolio-agent/main.py`, `scheduler.py` | Reminder-only: daily earnings-date check + Friday digest nudge (never generates) |
 | `portfolio-agent/config.py` | Loads `.env` + `holdings.json` |
 | `portfolio-agent/holdings.json` | Portfolio (tickers/shares/sector) + settings (digest time, thresholds) |
-| `portfolio-agent/delivery/render_pdf.py` | markdown → styled HTML (stdlib converter) → PDF via headless Chrome; final step of both skills |
+| `portfolio-agent/delivery/render_pdf.py` | markdown → styled HTML (stdlib converter) → PDF via headless Chrome; runs after saving in both skills |
+| `portfolio-agent/dashboard/build_dashboard.py` | Tracking dashboard: parses digests/briefs + holdings.json → self-contained `outputs/dashboard.html` (stdlib, inline SVG; `--offline` skips earnings fetch); refreshed as the last step of both skills |
 | `portfolio-agent/outputs/` | Earnings briefs (`{TICKER}_{YEAR}_Q{Q}.md`) + weekly digests (`digests/{date}.md`) |
 | `archive/api-path/` | Archived direct-Anthropic-API generation path (agents/, prompts/, old scheduler) — see its README to restore |
 | `archive/email-delivery/` | Archived SMTP email path (mailer.py, send_file.py) — parked in favor of PDF delivery (#64); see its README to restore |
@@ -54,8 +55,10 @@ There are no model constants: whatever model Claude Code is running does the ana
 
 The agent IS the two Claude Code skills:
 
-- `/weekly-digest` — no args; fetches data, writes the digest, saves to `outputs/digests/` as markdown + PDF
-- `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE` — 6-section brief, saved to `outputs/` as markdown + PDF
+- `/weekly-digest` — no args; fetches data, writes the digest, saves to `outputs/digests/` as markdown + PDF, refreshes the dashboard
+- `/earnings-deep-dive TICKER YEAR QUARTER EARNINGS_DATE` — 6-section brief, saved to `outputs/` as markdown + PDF, refreshes the dashboard
+
+View the tracking dashboard: `open portfolio-agent/outputs/dashboard.html` (gitignored; rebuild with `python3 portfolio-agent/dashboard/build_dashboard.py`).
 
 Setup and optional reminder scheduler:
 

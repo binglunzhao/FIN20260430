@@ -88,3 +88,14 @@ python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/render_
 Report the saved PDF path to the user. If rendering fails (e.g. no
 Chromium-based browser found), show the error and move on — the brief is
 already saved.
+
+## Step 6 — Refresh the dashboard
+
+Rebuild the tracking dashboard so it picks up the new brief:
+
+```bash
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/dashboard/build_dashboard.py
+```
+
+Mention that the dashboard was refreshed (portfolio-agent/outputs/dashboard.html).
+If it fails, show the error and move on — it never blocks the brief.

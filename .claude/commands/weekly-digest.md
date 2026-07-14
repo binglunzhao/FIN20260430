@@ -72,3 +72,14 @@ python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/delivery/render_
 Report the saved PDF path to the user. If rendering fails (e.g. no
 Chromium-based browser found), show the error and move on — the markdown
 digest is already saved and shown.
+
+## Step 5 — Refresh the dashboard
+
+Rebuild the tracking dashboard so it includes this digest:
+
+```bash
+python3 /Users/binglunzhao/Projects/FIN20260430/portfolio-agent/dashboard/build_dashboard.py
+```
+
+Mention that the dashboard was refreshed (portfolio-agent/outputs/dashboard.html).
+If it fails, show the error and move on — it never blocks the digest.
