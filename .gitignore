@@ -27,3 +27,6 @@ venv/
 
 # Pytest
 .pytest_cache/
+
+# Generated dashboard (rebuilt by the skills / build_dashboard.py)
+portfolio-agent/outputs/dashboard.html

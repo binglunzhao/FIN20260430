@@ -12,9 +12,18 @@ fetches data from free sources; Claude Code does the reasoning via two slash com
   Saved to `portfolio-agent/outputs/`.
 
 Both commands finish by rendering the output to PDF (saved next to the markdown,
-via headless Chrome — no extra dependencies). Email delivery is archived at
-[archive/email-delivery/](archive/email-delivery/); a visual tracking dashboard is the
-next planned delivery surface (#67).
+via headless Chrome — no extra dependencies) and refreshing the **tracking
+dashboard** — a self-contained HTML page built from local outputs:
+
+```bash
+python3 portfolio-agent/dashboard/build_dashboard.py   # rebuild by hand (--offline skips the earnings fetch)
+open portfolio-agent/outputs/dashboard.html
+```
+
+It shows last week's portfolio return, per-holding weekly returns, the
+portfolio-return trend across digests, earnings-brief coverage, and upcoming
+earnings dates. Email delivery is archived at
+[archive/email-delivery/](archive/email-delivery/).
 
 ## Quickstart
 
@@ -63,6 +72,7 @@ portfolio-agent/
 ├── data/              # prices (yfinance), transcripts (Motley Fool),
 │                      # news (Finnhub), filings (SEC EDGAR),
 │                      # fetch_*_for_skill.py JSON bridges for the skills
+├── dashboard/         # build_dashboard.py — static HTML tracking dashboard
 ├── delivery/          # render_pdf.py — markdown → PDF via headless Chrome
 ├── main.py            # reminder entry point (never generates)
 ├── scheduler.py       # Friday digest nudge + daily earnings-date check
